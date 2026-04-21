@@ -6,17 +6,17 @@
 ### Table of Contents
 
 1. [Project Overview](#project-overview) 
-2. Zero Trust Principles Applied
-3. Architecture
-4. Prerequisites
-5. Environment Setup
-6. Deployment
-7. Network Policies Explained
-8. Testing and Verification
-9. Results Summary
-10. MITRE ATT&CK Mapping
-11. Repository Structure
-12. Key Concepts Reference
+2. [Zero Trust Principles Applied](#zero-trust-principles-applied)
+3. [Architecture](#architecture)
+4. [Prerequisites](#prerequisites)
+5. [Environment Setup](#environment-setup)
+6. [Deployment](#deployment)
+7. [Network Policies Explained](#network-policies-explained)
+8. [Testing and Verification](#testing-and-verification)
+9. [Results Summary](#results-summary)
+10. [MITRE ATT&CK Mapping](#mitre-attck-mapping)
+11. [Repository Structure](#repository-structure)
+12. [Key Concepts Reference](#key-concepts-reference)
 
 
 ### Project Overview
