@@ -5,7 +5,7 @@
 
 ### Table of Contents
 
-1. [Project Overview](###project-overview) 
+1. [Project Overview](#project-overview) 
 2. Zero Trust Principles Applied
 3. Architecture
 4. Prerequisites
