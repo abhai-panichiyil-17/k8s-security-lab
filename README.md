@@ -1,7 +1,7 @@
 # Kubernetes Security Lab — Zero Trust Microsegmentation with Calico
 ### Author: Abhai Panichiyil
-### Based on: MSc Research: Implementing Zero Trust Security in Multi-Cloud and Hybrid Cloud Environments
-Stack: Minikube · Calico CNI · Kubernetes · Docker · Ubuntu 24.04
+### Based on: MSc Research: _Implementing Zero Trust Security in Multi-Cloud and Hybrid Cloud Environments_
+**Stack**: Minikube · Calico CNI · Kubernetes · Docker · Ubuntu 24.04
 
 ### Table of Contents
 
@@ -22,12 +22,12 @@ Stack: Minikube · Calico CNI · Kubernetes · Docker · Ubuntu 24.04
 ### Project Overview
 This lab demonstrates Zero Trust microsegmentation in a Kubernetes cluster using Calico as the Container Network Interface (CNI). A three-tier application (Nginx → Flask → Postgres) is deployed across three isolated namespaces, with Calico NetworkPolicies enforcing strict traffic control between tiers. 
 
-The goal is to prove that even inside a Kubernetes cluster, lateral movement is prevented — a compromised frontend pod cannot directly reach the database, and no pod can communicate with anything it hasn't been explicitly permitted to reach. 
+The goal is to prove that even inside a Kubernetes cluster, lateral movement is prevented. Thus a compromised frontend pod cannot directly reach the database, and no pod can communicate with anything it hasn't been explicitly permitted to reach. 
 
 This directly implements the findings from my MSc practicum paper on Zero Trust Architecture in hybrid cloud environments. 
 
 ### Zero Trust Principles Applied
-Zero Trust is a security model that assumes no user, device, or network segment is inherently trustworthy — even those already inside the perimeter. 
+Zero Trust is a security model that assumes no user, device, or network segment is inherently trustworthy, even those already inside the perimeter. 
 
 | Principle | How It Is Implemented in This Lab |
 |-----------|-----------------------------------|
@@ -36,6 +36,7 @@ Zero Trust is a security model that assumes no user, device, or network segment 
 Assume breach | Even if the frontend is compromised, Calico prevents it from reaching the database directly | 
 
 ### Architecture
+<pre>
 Internet \
     | \
 [NodePort :30080] \
@@ -48,10 +49,10 @@ Internet \
     | \
     | ALLOWED by Calico (port 5432) \
     ↓ \
-[Postgres Pod]       ← database namespace \
-
+[Postgres Pod]       ← database namespace 
+</pre>
 Frontend → Database: BLOCKED by Calico (no direct path exists) \
-Backend → Frontend:  BLOCKED by Calico (no reverse path) \
+Backend → Frontend:  BLOCKED by Calico (no reverse path) 
 
 Why Three Namespaces? \
 Kubernetes namespaces act as logical boundaries inside the cluster. By placing each tier in its own namespace, we can write Calico NetworkPolicies that say "only the backend namespace may talk to the database namespace." This is namespace-level microsegmentation — a core pattern in Zero Trust network design. 
@@ -218,7 +219,7 @@ All four results match the intended Zero Trust design. Traffic flows strictly do
 The Kali attack simulation phase (planned) will probe the cluster from an external VM and document which attack vectors Calico blocks, mapped to these techniques.
 
 ### Repository Structure
-
+<pre>
 k8s-security-lab/
 ├── README.md
 ├── diagrams/
@@ -240,7 +241,7 @@ k8s-security-lab/
 └── app/
     ├── Dockerfile
     └── app.py
-
+</pre>
 ### Key Concepts Reference
 **Pod vs Deployment**
 
