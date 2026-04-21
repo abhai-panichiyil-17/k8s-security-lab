@@ -1,122 +1,140 @@
-Kubernetes Security Lab — Zero Trust Microsegmentation with Calico
-Author: Abhai Panichiyil
-Based on: MSc Research: Implementing Zero Trust Security in Multi-Cloud and Hybrid Cloud Environments
+# Kubernetes Security Lab — Zero Trust Microsegmentation with Calico
+### Author: Abhai Panichiyil
+### Based on: MSc Research: Implementing Zero Trust Security in Multi-Cloud and Hybrid Cloud Environments
 Stack: Minikube · Calico CNI · Kubernetes · Docker · Ubuntu 24.04
 
-Table of Contents
+### Table of Contents
 
-Project Overview
-Zero Trust Principles Applied
-Architecture
-Prerequisites
-Environment Setup
-Deployment
-Network Policies Explained
-Testing and Verification
-Results Summary
-MITRE ATT&CK Mapping
-Repository Structure
-Key Concepts Reference
+1. Project Overview 
+2. Zero Trust Principles Applied
+3. Architecture
+4. Prerequisites
+5. Environment Setup
+6. Deployment
+7. Network Policies Explained
+8. Testing and Verification
+9. Results Summary
+10. MITRE ATT&CK Mapping
+11. Repository Structure
+12. Key Concepts Reference
 
 
-Project Overview
-This lab demonstrates Zero Trust microsegmentation in a Kubernetes cluster using Calico as the Container Network Interface (CNI). A three-tier application (Nginx → Flask → Postgres) is deployed across three isolated namespaces, with Calico NetworkPolicies enforcing strict traffic control between tiers.
-The goal is to prove that even inside a Kubernetes cluster, lateral movement is prevented — a compromised frontend pod cannot directly reach the database, and no pod can communicate with anything it hasn't been explicitly permitted to reach.
-This directly implements the findings from my MSc practicum paper on Zero Trust Architecture in hybrid cloud environments.
+### Project Overview
+This lab demonstrates Zero Trust microsegmentation in a Kubernetes cluster using Calico as the Container Network Interface (CNI). A three-tier application (Nginx → Flask → Postgres) is deployed across three isolated namespaces, with Calico NetworkPolicies enforcing strict traffic control between tiers. 
 
-Zero Trust Principles Applied
-Zero Trust is a security model that assumes no user, device, or network segment is inherently trustworthy — even those already inside the perimeter.
-PrincipleHow It Is Implemented in This LabNever trust, always verifyEvery pod-to-pod connection is evaluated against Calico NetworkPolicies before being allowedLeast privilegeEach pod can only communicate with exactly what it needs — nothing moreAssume breachEven if the frontend is compromised, Calico prevents it from reaching the database directly
+The goal is to prove that even inside a Kubernetes cluster, lateral movement is prevented — a compromised frontend pod cannot directly reach the database, and no pod can communicate with anything it hasn't been explicitly permitted to reach. 
 
-Architecture
-Internet
-    |
-[NodePort :30080]
-    |
-[Nginx Pod]          ← frontend namespace
-    |
-    | ALLOWED by Calico (port 5000)
-    ↓
-[Flask API Pod]      ← backend namespace
-    |
-    | ALLOWED by Calico (port 5432)
-    ↓
-[Postgres Pod]       ← database namespace
+This directly implements the findings from my MSc practicum paper on Zero Trust Architecture in hybrid cloud environments. 
 
-Frontend → Database: BLOCKED by Calico (no direct path exists)
-Backend → Frontend:  BLOCKED by Calico (no reverse path)
-Why Three Namespaces?
-Kubernetes namespaces act as logical boundaries inside the cluster. By placing each tier in its own namespace, we can write Calico NetworkPolicies that say "only the backend namespace may talk to the database namespace." This is namespace-level microsegmentation — a core pattern in Zero Trust network design.
+### Zero Trust Principles Applied
+Zero Trust is a security model that assumes no user, device, or network segment is inherently trustworthy — even those already inside the perimeter. 
+
+| Principle | How It Is Implemented in This Lab |
+|-----------|-----------------------------------|
+| Never trust, always verify | Every pod-to-pod connection is evaluated against Calico NetworkPolicies before being allowed |
+| Least privilege | Each pod can only communicate with exactly what it needs — nothing more |
+Assume breach | Even if the frontend is compromised, Calico prevents it from reaching the database directly | 
+
+### Architecture
+Internet \
+    | \
+[NodePort :30080] \
+    | \
+[Nginx Pod]          ← frontend namespace \
+    | \
+    | ALLOWED by Calico (port 5000) \
+    ↓ \
+[Flask API Pod]      ← backend namespace \
+    | \
+    | ALLOWED by Calico (port 5432) \
+    ↓ \
+[Postgres Pod]       ← database namespace \
+
+Frontend → Database: BLOCKED by Calico (no direct path exists) \
+Backend → Frontend:  BLOCKED by Calico (no reverse path) \
+
+Why Three Namespaces? \
+Kubernetes namespaces act as logical boundaries inside the cluster. By placing each tier in its own namespace, we can write Calico NetworkPolicies that say "only the backend namespace may talk to the database namespace." This is namespace-level microsegmentation — a core pattern in Zero Trust network design. 
+
 Without separate namespaces, enforcing this kind of granular isolation would require much more complex pod-label-only selectors and would be harder to audit and maintain.
 
-Prerequisites
-ToolVersion UsedPurposeVirtualBox7.1.0Hypervisor for local Ubuntu VMUbuntu24.04 LTSHost OS for the lab environmentDocker29.3.0Container runtime — Minikube driverkubectlv1.35.3Kubernetes CLI — interact with the clusterMinikubeLatestSingle-node local Kubernetes cluster
+### Prerequisites
+
+| Tool | Version Used | Purpose |
+|------|---------------|---------|
+| VirtualBox | 7.1.0 | Hypervisor for local Ubuntu VM |
+| Ubuntu | 24.04 LTS | Host OS for the lab environment | 
+| Docker | 29.3.0 | Container runtime — Minikube driver |
+| kubectl | v1.35.3 | Kubernetes CLI — interact with the cluster |
+| Minikube | Latest | Single-node local Kubernetes cluster|
+
 VM Specs: 6GB RAM · 4 CPUs · SSD storage · VMSVGA graphics
 
-Environment Setup
+### Environment Setup
 1. Start Docker
-Docker must be running before Minikube can start, as it uses Docker as its node driver.
-sudo systemctl start docker
-sudo systemctl status docker
+Docker must be running before Minikube can start, as it uses Docker as its node driver. 
+> sudo systemctl start docker \
 ##SHOT
-3. Start Minikube with Calico
-minikube start --driver=docker --cni=calico --cpus=2 --memory=3000
+3. Start Minikube with Calico 
+> minikube start --driver=docker --cni=calico --cpus=2 --memory=3000
 
-Flag explanations:
---driver=docker : uses Docker (already installed) as the engine, avoiding a VM-inside-a-VM
---cni=calico : installs Calico as the network plugin; without this, NetworkPolicies are silently ignored
---cpus=2 --memory=3000 — allocates half the VM's resources to the cluster, leaving headroom for the OS
+Flag explanations: 
+* --driver=docker : uses Docker (already installed) as the engine, avoiding a VM-inside-a-VM
+* --cni=calico : installs Calico as the network plugin; without this, NetworkPolicies are silently ignored
+* --cpus=2 --memory=3000 — allocates half the VM's resources to the cluster, leaving headroom for the OS
 
 3. Verify Cluster Health
-kubectl get nodes
-kubectl get pods -n kube-system | grep calico
-##SHOT
+> kubectl get nodes \
+> kubectl get pods -n kube-system | grep calico \
+##SHOT \
+
 Note: On this version of Minikube, Calico pods land in kube-system rather than calico-system. Both calico-kube-controllers and calico-node must show Running before proceeding.
 
 4. Create Namespaces
-kubectl create namespace frontend
-kubectl create namespace backend
-kubectl create namespace database
-#shot
+> kubectl create namespace frontend \
+> kubectl create namespace backend \
+> kubectl create namespace database \
+#shot \
+> 
 Each namespace maps to one tier of the application. Calico NetworkPolicies reference these namespaces by their kubernetes.io/metadata.name label.
 
-Deployment
-Frontend — Nginx
-File: k8s/deployments/nginx.yaml
+### Deployment
+Frontend — Nginx \
+File: k8s/deployments/nginx.yaml \
 Nginx acts as the public-facing web server. It is the only pod exposed to the outside world via a NodePort service on port 30080.
 
-kubectl apply -f k8s/deployments/nginx.yaml
+> kubectl apply -f k8s/deployments/nginx.yaml
 
-Key points:
-Labels "app: nginx" and "tier: frontend" are used by Calico to identify this pod
-NodePort service exposes it at localhost:30080
+Key points: \
+Labels "app: nginx" and "tier: frontend" are used by Calico to identify this pod \
+NodePort service exposes it at localhost:30080 \
 All other pods use ClusterIP (internal only)
 
-Backend — Flask API
-File: k8s/deployments/flask.yaml
+Backend — Flask API \
+File: k8s/deployments/flask.yaml \
 A mock Flask API implemented using Python's built-in HTTP server. In a production scenario this would be a real application server. For this lab, its role is to represent the middle tier that brokers requests between the frontend and database.
 
-kubectl apply -f k8s/deployments/flask.yaml
+> kubectl apply -f k8s/deployments/flask.yaml
 
-Key points:
-ClusterIP service — not reachable from outside the cluster
+Key points: \
+ClusterIP service — not reachable from outside the cluster \
 Only Nginx is permitted to send traffic to this pod (enforced by Calico)
 
-Database — Postgres
-File: k8s/deployments/postgres.yaml
+Database — Postgres \
+File: k8s/deployments/postgres.yaml \
 Postgres is the most sensitive tier. It holds data and should never be directly reachable from the frontend or from outside the cluster.
 
-kubectl apply -f k8s/deployments/postgres.yaml
+> kubectl apply -f k8s/deployments/postgres.yaml
 
-Key points:
-ClusterIP service — internal only
-Only Flask is permitted to send traffic to this pod (enforced by Calico)
+Key points: \
+ClusterIP service — internal only \
+Only Flask is permitted to send traffic to this pod (enforced by Calico) \
 Egress is completely denied — Postgres cannot initiate any outbound connections
 
-Verify All Pods Running
-kubectl get pods --all-namespaces
+Verify All Pods Running \
+> kubectl get pods --all-namespaces
 
-Network Policies Explained
+### Network Policies Explained
 Calico's key behaviour: once any NetworkPolicy is applied to a pod, all traffic to and from that pod is denied by default. You only write ALLOW rules — everything else is automatically blocked. This is deny-by-default, the foundation of Zero Trust networking.
 
 Frontend Policy
@@ -136,7 +154,7 @@ File: k8s/network-policies/database-policy.yaml
 yamlin ##shot
 The empty egress array ([]) is deliberate and important. A database has no legitimate reason to initiate connections to anything. Denying all egress means that even if an attacker gains a foothold inside the Postgres pod, they cannot reach other services, exfiltrate data over the network, or pivot to other parts of the cluster.
 
-Testing and Verification
+### Testing and Verification
 All tests run using kubectl exec to jump inside pods and attempt connections.
 
 Why connections time out instead of being refused: Calico silently drops blocked packets — it does not send back a TCP RST or ICMP rejection. The connecting pod just waits until its timeout expires. This is deliberate behaviour — it avoids revealing firewall rules to potential attackers.
@@ -178,7 +196,7 @@ s.close()
 Expected: socket.timeout: timed out
 Why it's blocked: backend-policy only allows egress to the database namespace — there is no rule permitting Flask to talk back to Nginx
 
-Results Summary
+### Results Summary
 
 | Source | Destination | Port | Result | Policy Responsible |
 |--------|-------------|------|--------|--------------------|
@@ -189,7 +207,7 @@ Results Summary
 
 All four results match the intended Zero Trust design. Traffic flows strictly down the chain (Frontend → Backend → Database) with no lateral movement permitted.
 
-MITRE ATT&CK Mapping
+### MITRE ATT&CK Mapping
 
 | Technique | ID | Lab Relevance |
 |-----------|----|---------------|
@@ -199,7 +217,8 @@ MITRE ATT&CK Mapping
 
 The Kali attack simulation phase (planned) will probe the cluster from an external VM and document which attack vectors Calico blocks, mapped to these techniques.
 
-Repository Structure
+### Repository Structure
+
 k8s-security-lab/
 ├── README.md
 ├── diagrams/
@@ -222,25 +241,26 @@ k8s-security-lab/
     ├── Dockerfile
     └── app.py
 
-Key Concepts Reference
-Pod vs Deployment
+### Key Concepts Reference
+**Pod vs Deployment**
 
 Pod — the smallest deployable unit in Kubernetes. Contains one or more containers that share a network namespace and storage. Has a single IP address inside the cluster.
 Deployment — a controller that manages pods. Handles automatic restarts if a pod crashes, scaling, and rolling updates. For production use, you always use Deployments rather than bare Pods. This lab uses bare Pods for simplicity.
 
-ClusterIP vs NodePort
+**ClusterIP vs NodePort**
 
 ClusterIP — the default service type. Gives a pod a stable internal IP address that only other pods inside the cluster can reach. Used for Flask and Postgres — they should never be directly accessible from outside.
 NodePort — exposes a service on a port on the host machine (e.g. port 30080). Used for Nginx — it is the only pod that the outside world should be able to reach.
 
-Ingress vs Egress (NetworkPolicy context)
-
+**Ingress vs Egress (NetworkPolicy context)
+**
 Ingress — traffic coming IN to a pod. A database ingress rule controls who is allowed to send data to Postgres.
 Egress — traffic going OUT from a pod. A frontend egress rule controls where Nginx is allowed to send requests.
 
-Why Calico?
+**Why Calico?**
 Kubernetes has a NetworkPolicy API built in, but the default networking plugins (like kindnet or flannel) do not enforce those policies. Calico is a CNI plugin that actually reads and enforces NetworkPolicy rules. Without a CNI like Calico, you can write all the policies you want and they will simply be ignored.
-DNS and NetworkPolicies
+
+**DNS and NetworkPolicies**
 CoreDNS (the cluster's internal DNS server) lives in the kube-system namespace. When a pod tries to resolve a service name like flask-service.backend.svc.cluster.local, it sends a DNS query to CoreDNS on port 53. If your NetworkPolicy doesn't explicitly allow egress to kube-system on port 53, Calico blocks those DNS queries and all hostname-based connections fail — even if the actual service connection would be allowed. Always include a DNS egress rule in your policies.
 
 Last updated: April 2026
