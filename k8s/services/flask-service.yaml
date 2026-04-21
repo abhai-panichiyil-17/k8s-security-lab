@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"name":"flask-service","namespace":"backend"},"spec":{"ports":[{"port":5000,"targetPort":5000}],"selector":{"app":"flask"},"type":"ClusterIP"}}
+  creationTimestamp: "2026-04-10T13:47:59Z"
+  name: flask-service
+  namespace: backend
+  resourceVersion: "3183"
+  uid: e8a1d323-7ee9-4a3b-b68c-c46b598c6039
+spec:
+  clusterIP: 10.111.178.19
+  clusterIPs:
+  - 10.111.178.19
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - port: 5000
+    protocol: TCP
+    targetPort: 5000
+  selector:
+    app: flask
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}

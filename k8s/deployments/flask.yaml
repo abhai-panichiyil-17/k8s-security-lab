@@ -1,0 +1,144 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    cni.projectcalico.org/containerID: 0f44dca83ace8dc66568f0e35bc3ef1aecfb3f805339cbafa4126812f8e20269
+    cni.projectcalico.org/podIP: 10.244.120.71/32
+    cni.projectcalico.org/podIPs: 10.244.120.71/32
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Pod","metadata":{"annotations":{},"labels":{"app":"flask","tier":"backend"},"name":"flask-pod","namespace":"backend"},"spec":{"containers":[{"args":["import http.server\nimport socketserver\nhandler = http.server.SimpleHTTPRequestHandler\nwith socketserver.TCPServer(('', 5000), handler) as httpd:\n    print('Flask mock running on port 5000')\n    httpd.serve_forever()\n"],"command":["python","-c"],"image":"python:3.9-slim","name":"flask","ports":[{"containerPort":5000}]}]}}
+  creationTimestamp: "2026-04-10T13:47:59Z"
+  generation: 1
+  labels:
+    app: flask
+    tier: backend
+  name: flask-pod
+  namespace: backend
+  resourceVersion: "6148"
+  uid: a53e03ec-e613-456a-8480-e26cd20bb188
+spec:
+  containers:
+  - args:
+    - |
+      import http.server
+      import socketserver
+      handler = http.server.SimpleHTTPRequestHandler
+      with socketserver.TCPServer(('', 5000), handler) as httpd:
+          print('Flask mock running on port 5000')
+          httpd.serve_forever()
+    command:
+    - python
+    - -c
+    image: python:3.9-slim
+    imagePullPolicy: IfNotPresent
+    name: flask
+    ports:
+    - containerPort: 5000
+      protocol: TCP
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-6hsxv
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  nodeName: minikube
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: default
+  serviceAccountName: default
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: kube-api-access-6hsxv
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2026-04-21T18:48:32Z"
+    observedGeneration: 1
+    status: "True"
+    type: PodReadyToStartContainers
+  - lastProbeTime: null
+    lastTransitionTime: "2026-04-10T13:47:59Z"
+    observedGeneration: 1
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2026-04-21T18:48:32Z"
+    observedGeneration: 1
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2026-04-21T18:48:32Z"
+    observedGeneration: 1
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2026-04-10T13:47:59Z"
+    observedGeneration: 1
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: docker://4a08b868d7f18224f557bf83273365544f305680b9044fa17233db351a6e7bea
+    image: python:3.9-slim
+    imageID: docker-pullable://python@sha256:2d97f6910b16bd338d3060f261f53f144965f755599aab1acda1e13cf1731b1b
+    lastState:
+      terminated:
+        containerID: docker://df9ae52555d174799b32cd890fc03ca977f777e9f6eec921fca4f208899f536c
+        exitCode: 137
+        finishedAt: "2026-04-10T14:45:05Z"
+        reason: Error
+        startedAt: "2026-04-10T13:55:54Z"
+    name: flask
+    ready: true
+    resources: {}
+    restartCount: 1
+    started: true
+    state:
+      running:
+        startedAt: "2026-04-21T18:48:23Z"
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-6hsxv
+      readOnly: true
+      recursiveReadOnly: Disabled
+  hostIP: 192.168.49.2
+  hostIPs:
+  - ip: 192.168.49.2
+  observedGeneration: 1
+  phase: Running
+  podIP: 10.244.120.71
+  podIPs:
+  - ip: 10.244.120.71
+  qosClass: BestEffort
+  startTime: "2026-04-10T13:47:59Z"

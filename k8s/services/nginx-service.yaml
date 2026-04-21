@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"name":"nginx-service","namespace":"frontend"},"spec":{"ports":[{"nodePort":30080,"port":80,"targetPort":80}],"selector":{"app":"nginx"},"type":"NodePort"}}
+  creationTimestamp: "2026-04-10T13:47:00Z"
+  name: nginx-service
+  namespace: frontend
+  resourceVersion: "3127"
+  uid: 830ef8c9-b37b-4bf9-8759-677de09b0807
+spec:
+  clusterIP: 10.102.22.178
+  clusterIPs:
+  - 10.102.22.178
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - nodePort: 30080
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: nginx
+  sessionAffinity: None
+  type: NodePort
+status:
+  loadBalancer: {}

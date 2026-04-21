@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"networking.k8s.io/v1","kind":"NetworkPolicy","metadata":{"annotations":{},"name":"database-policy","namespace":"database"},"spec":{"egress":[],"ingress":[{"from":[{"namespaceSelector":{"matchLabels":{"kubernetes.io/metadata.name":"backend"}}}],"ports":[{"port":5432,"protocol":"TCP"}]}],"podSelector":{"matchLabels":{"app":"postgres"}},"policyTypes":["Ingress","Egress"]}}
+  creationTimestamp: "2026-04-10T13:58:03Z"
+  generation: 1
+  name: database-policy
+  namespace: database
+  resourceVersion: "3686"
+  uid: e445812b-b46e-41fc-93fb-50ba9fd31063
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: backend
+    ports:
+    - port: 5432
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app: postgres
+  policyTypes:
+  - Ingress
+  - Egress

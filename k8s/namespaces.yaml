@@ -1,0 +1,47 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    creationTimestamp: "2026-04-10T13:46:02Z"
+    labels:
+      kubernetes.io/metadata.name: frontend
+    name: frontend
+    resourceVersion: "3065"
+    uid: 35a03f05-c7f8-4dc3-84b7-01499acc4d9d
+  spec:
+    finalizers:
+    - kubernetes
+  status:
+    phase: Active
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    creationTimestamp: "2026-04-10T13:46:09Z"
+    labels:
+      kubernetes.io/metadata.name: backend
+    name: backend
+    resourceVersion: "3075"
+    uid: be1c0147-ccf2-447b-b018-95814ef33cf2
+  spec:
+    finalizers:
+    - kubernetes
+  status:
+    phase: Active
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    creationTimestamp: "2026-04-10T13:46:16Z"
+    labels:
+      kubernetes.io/metadata.name: database
+    name: database
+    resourceVersion: "3084"
+    uid: f33f1afd-9ae6-4bd8-bf9a-43553fcb400d
+  spec:
+    finalizers:
+    - kubernetes
+  status:
+    phase: Active
+kind: List
+metadata:
+  resourceVersion: ""
