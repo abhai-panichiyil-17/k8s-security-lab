@@ -64,6 +64,8 @@ Without separate namespaces, enforcing this kind of granular isolation would req
 ---
 ### Prerequisites
 
+Tools Used:
+
 | Tool | Version Used | Purpose |
 |------|---------------|---------|
 | VirtualBox | 7.1.0 | Hypervisor for local Ubuntu VM |
@@ -72,8 +74,16 @@ Without separate namespaces, enforcing this kind of granular isolation would req
 | kubectl | v1.35.3 | Kubernetes CLI — interact with the cluster |
 | Minikube | Latest | Single-node local Kubernetes cluster|
 
-VM Specs: 6GB RAM · 4 CPUs · SSD storage · VMSVGA graphics
+Development Environment Specs:
 
+| Component | Host Machine (Physical) | Virtual Machine (Guest) |
+| :--- | :--- | :--- |
+| OS | Windows 11 | Ubuntu 24.04 LTS |
+| CPU | Intel i7-13620H (16 Threads) | 10 vCPUs |
+| RAM | 16 GB | 9 GB (9080 MB) |
+| Storage | 1 TB NVMe SSD | 500 GB VDI (Dynamic) | 
+| GPU | NVIDIA RTX 4060 (8 GB) | VMSVGA (128 MB VRAM) |
+| Hypervisor | N/A | VirtualBox 7.1.0 |
 ---
 ### Environment Setup
 1. Start Docker \
@@ -88,7 +98,7 @@ sudo systemctl status docker
 Flag explanations: 
 * _--driver=docker_ : uses Docker (already installed) as the engine, avoiding a VM-inside-a-VM
 * _--cni=calico_ : installs Calico as the network plugin; without this, NetworkPolicies are silently ignored
-* _--cpus=2 --memory=3000_ : allocates half the VM's resources to the cluster, leaving headroom for the OS
+* _--cpus=2 --memory=3000_ : allocates just enough of the VM's resources to the cluster, leaving headroom for the OS
 
 3. Verify Cluster Health
 <pre>kubectl get nodes 
