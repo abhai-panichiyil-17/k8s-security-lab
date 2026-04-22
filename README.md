@@ -72,7 +72,7 @@ Tools Used:
 | Ubuntu | 24.04 LTS | Host OS for the lab environment | 
 | Docker | 29.3.0 | Container runtime — Minikube driver |
 | kubectl | v1.35.3 | Kubernetes CLI — interact with the cluster |
-| Minikube | Latest | Single-node local Kubernetes cluster|
+| Minikube | 1.38.1 | Single-node local Kubernetes cluster|
 
 Development Environment Specs:
 
